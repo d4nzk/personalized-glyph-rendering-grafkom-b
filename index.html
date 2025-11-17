@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>DA0</title>
+    <link type="text/css" href="index.css" rel="stylesheet" />
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+    <div id="uiContainer">
+        <div id="ui">
+            <div id="fRotation"></div>
+        </div>
+    </div>
+    <script id="vertex-shader-3d" type="x-shader/x-vertex">
+        attribute vec4 a_position;
+        attribute vec3 a_normal;
+
+        uniform mat4 u_worldViewProjection;
+        uniform mat4 u_world;
+
+        varying vec3 v_normal;
+
+        void main() {
+            // Transform position to clip space
+            gl_Position = u_worldViewProjection * a_position;
+
+            // Transform normals to world space and pass to fragment shader
+            v_normal = mat3(u_world) * a_normal;
+        }
+    </script>
+    <script id="fragment-shader-3d" type="x-shader/x-fragment">
+        precision mediump float;
+
+        // Inputs from vertex shader
+        varying vec3 v_normal;
+
+        // Uniforms
+        uniform vec3 u_reverseLightDirection;
+        uniform vec4 u_color;
+
+        void main() {
+            // Normalize the interpolated normal vector
+            vec3 normal = normalize(v_normal);
+
+            // Calculate directional lighting intensity
+            float light = dot(normal, u_reverseLightDirection);
+
+            // Apply base color
+            gl_FragColor = u_color;
+
+            // Multiply color by light intensity
+            gl_FragColor.rgb *= light;
+        }
+    </script>
+    <!-- ================================================================ -->
+    <!-- External Libraries -->
+    <!-- WebGL utilities for shader compilation and canvas management -->
+    <!-- ================================================================ -->
+    <script src="https://webglfundamentals.org/webgl/resources/webgl-utils.js"></script>
+    <script src="https://webglfundamentals.org/webgl/resources/webgl-lessons-ui.js"></script>
+    <script src="https://webglfundamentals.org/webgl/resources/m4.js"></script>
+    
+    <!-- ================================================================ -->
+    <!-- Application Scripts - Load in correct order -->
+    <!-- ================================================================ -->
+    <script src="helper.js?v=2"></script>      <!-- Helper functions and configs -->
+    <script src="data.js?v=2"></script>        <!-- Geometry and normals data -->
+    <script src="IOHandler.js?v=2"></script>   <!-- Input/output handlers -->
+    <script src="main.js?v=2"></script>        <!-- Main application logic -->
+</body>
+</html>
